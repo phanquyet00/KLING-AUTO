@@ -1,0 +1,37 @@
+{
+  "manifest_version": 2,
+  "name": "IP Changer - Webshare Proxy",
+  "version": "1.1",
+  "description": "Sidebar luôn hiển thị bên trái để bật/tắt proxy Webshare đổi IP. Toggle một nút — IP thay đổi ngay.",
+  "permissions": [
+    "proxy",
+    "storage",
+    "webRequest",
+    "webRequestBlocking",
+    "<all_urls>"
+  ],
+  "browser_action": {
+    "default_title": "IP Changer — Bấm để mở/đóng sidebar",
+    "default_icon": {
+      "16": "icons/icon-off.svg",
+      "32": "icons/icon-off.svg",
+      "48": "icons/icon-off.svg",
+      "96": "icons/icon-off.svg"
+    }
+  },
+  "sidebar_action": {
+    "default_title": "IP Changer",
+    "default_panel": "sidebar.html",
+    "default_icon": "icons/icon-off.svg",
+    "open_at_install": true
+  },
+  "background": {
+    "scripts": ["background.js"]
+  },
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "ipchanger@webshare",
+      "strict_min_version": "91.0"
+    }
+  }
+}

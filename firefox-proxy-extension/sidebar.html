@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="sidebar.css">
+</head>
+<body>
+  <div class="sidebar">
+
+    <!-- Header -->
+    <div class="header">
+      <span class="logo">🌐</span>
+      <h1>IP Changer</h1>
+      <span class="badge" id="statusBadge">TẮT</span>
+    </div>
+
+    <!-- Error block -->
+    <div class="error" id="error" style="display:none;"></div>
+
+    <!-- Toggle -->
+    <div class="toggle-card">
+      <span class="toggle-label" id="toggleLabel">Proxy</span>
+      <label class="switch">
+        <input type="checkbox" id="toggleBtn">
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <!-- IP Display -->
+    <div class="ip-section">
+      <div class="ip-title">IP hiện tại</div>
+      <div class="ip-row">
+        <code class="ip-value" id="ipDisplay">--</code>
+        <button class="icon-btn" id="copyIpBtn" title="Sao chép IP">📋</button>
+      </div>
+    </div>
+
+    <!-- Refresh button -->
+    <button class="btn primary" id="refreshBtn" style="display:none;">
+      🔄 Đổi IP khác
+    </button>
+
+    <!-- Status message -->
+    <div class="toast" id="toast" style="display:none;"></div>
+
+    <!-- Divider -->
+    <hr>
+
+    <!-- Settings -->
+    <details class="settings" id="settingsGroup">
+      <summary>⚙ Cài đặt API</summary>
+      <div class="settings-body">
+        <label for="apiKeyInput">API Key Webshare</label>
+        <div class="input-row">
+          <input
+            type="password"
+            id="apiKeyInput"
+            placeholder="Dán API Key..."
+            autocomplete="off"
+          >
+          <button class="btn sm" id="showKeyBtn">👁</button>
+        </div>
+        <button class="btn sm full" id="saveKeyBtn">💾 Lưu Key</button>
+        <p class="hint">
+          Lấy key tại
+          <a href="https://proxy.webshare.io/user/settings/api" target="_blank">
+            Webshare → Settings → API
+          </a>
+        </p>
+      </div>
+    </details>
+
+    <!-- Divider -->
+    <hr>
+
+    <!-- Info -->
+    <div class="info">
+      <p>Webshare Proxy • v1.1</p>
+      <p class="subtle">Sidebar luôn hiển thị • Bấm nút toolbar để đóng/mở</p>
+    </div>
+
+  </div>
+  <script src="sidebar.js"></script>
+</body>
+</html>

@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>KlingAI Auto Login</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="list">📋 Danh sách</button>
+      <button class="tab-btn" data-tab="prompts">📝 Prompt</button>
+      <button class="tab-btn" data-tab="proxy">🌐 Proxy</button>
+    </div>
+
+    <!-- Tab Danh sách -->
+    <section class="tab-content active" id="tab-list">
+      <!-- Quick add -->
+      <div class="quick-add">
+        <textarea id="quickAddInput" rows="1" placeholder="email|password, mỗi dòng 1 tài khoản..." class="quick-add-input"></textarea>
+        <button id="quickAddBtn" class="btn-add">Thêm</button>
+        <button id="clearAllBtn" class="btn-bulk danger">🗑 Xóa tất cả</button>
+      </div>
+
+      <!-- Bulk bar -->
+      <div class="bulk-bar">
+        <button id="login8Btn" class="btn-bulk8" title="Login 8 tài khoản + 8 ảnh đầu">8🚀</button>
+        <button id="continueBtn" class="btn-bulk8">▶ Tiếp tục</button>
+        <button id="downloadVideoBtn" class="btn-bulk8 download">⬇</button>
+        <button id="batchPrev" class="btn-batch-nav" title="Lùi lô">◀</button>
+        <span id="batchIndicator" class="batch-indicator"></span>
+        <button id="batchNext" class="btn-batch-nav" title="Lô tiếp">▶</button>
+        <button id="clear8Btn" class="btn-bulk8 danger" title="Xóa 8 tài khoản + 8 ảnh đầu">8🗑</button>
+      </div>
+
+      <!-- Account list -->
+      <div id="accountList" class="account-list">
+        <div class="empty-state">
+          <p>Chưa có tài khoản</p>
+          <small>Nhập email|password ở ô trên và bấm Thêm</small>
+        </div>
+      </div>
+
+      <!-- Chế độ -->
+      <div class="mode-inline">
+        <label class="checkbox-wrapper">
+          <input type="checkbox" id="autoModeEnabled">
+          <span><strong>Chế độ 2.1</strong></span>
+        </label>
+        <label class="checkbox-wrapper">
+          <input type="checkbox" id="mode3Enabled">
+          <span><strong>Chế độ 3.0</strong></span>
+        </label>
+        <label class="checkbox-wrapper">
+          <input type="checkbox" id="autoPromptEnabled">
+          <span><strong>Prompt + 1080 + Generate</strong></span>
+        </label>
+        <label class="checkbox-wrapper">
+          <input type="checkbox" id="autoUploadEnabled">
+          <span><strong>Auto</strong> upload ảnh</span>
+        </label>
+      </div>
+
+      <!-- Image Management (gộp vào tab Danh sách) -->
+      <div class="image-panel">
+        <div class="image-panel-header">
+          <div class="image-panel-title">
+            <span>🖼</span>
+            <span>Ảnh</span>
+            <span class="badge-sm" id="imageCount">0</span>
+          </div>
+          <div class="image-panel-actions">
+            <span id="storageSize" class="storage-size">0 KB</span>
+            <button id="clearImagesBtn" class="btn-clear-images">Xóa tất cả ảnh</button>
+          </div>
+        </div>
+        <div id="imageGrid" class="image-grid">
+          <div class="upload-zone" id="uploadZone">
+            <input type="file" id="imageFile" accept="image/*" multiple hidden>
+            <span>+ Thêm ảnh</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tab Prompt -->
+    <section class="tab-content" id="tab-prompts">
+      <div class="form-group" style="flex:1">
+        <label for="promptsInput">Danh sách prompt (mỗi dòng 1 prompt, random chọn)</label>
+        <textarea id="promptsInput" rows="24" placeholder="Cinematic shot of a landscape&#10;Action scene with dynamic movement"></textarea>
+      </div>
+
+      <button type="button" id="savePromptsBtn" class="btn-primary">💾 Lưu prompts</button>
+
+      <div class="config-info">
+        <p><strong>Cách hoạt động:</strong></p>
+        <p>1. Login → 1080p + prompt1 → Generate</p>
+        <p>2. Xong video 1 → 720p + prompt2 → sẵn sàng</p>
+        <p>Mỗi tài khoản tạo <strong>2 video</strong>.</p>
+      </div>
+    </section>
+
+    <!-- Tab Proxy -->
+    <section class="tab-content" id="tab-proxy">
+      <!-- Toggle -->
+      <div class="toggle-card">
+        <span class="toggle-card-label" id="proxyToggleLabel">Proxy đang TẮT</span>
+        <label class="switch">
+          <input type="checkbox" id="proxyToggle">
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <!-- IP Display -->
+      <div class="proxy-ip-section">
+        <div class="proxy-ip-title">IP hiện tại</div>
+        <div class="proxy-ip-row">
+          <code class="proxy-ip-value" id="proxyIpDisplay">--</code>
+          <button class="proxy-copy-btn" id="proxyCopyIpBtn" title="Sao chép IP">📋</button>
+        </div>
+        <div class="proxy-index-row" id="proxyIndexRow" style="display:none;">
+          <span class="proxy-index-text">Proxy <strong id="proxyIndexText">#1</strong> / <span id="proxyTotalText">10</span></span>
+        </div>
+      </div>
+
+      <!-- Refresh button -->
+      <button class="btn-proxy-refresh" id="proxyRefreshBtn" style="display:none;">🔄 Đổi IP khác</button>
+
+      <!-- Error -->
+      <div class="proxy-error" id="proxyError" style="display:none;"></div>
+
+      <!-- Toast -->
+      <div class="proxy-toast" id="proxyToast" style="display:none;"></div>
+
+      <hr class="proxy-divider">
+
+      <!-- Settings -->
+      <details class="proxy-settings" id="proxySettingsGroup">
+        <summary>⚙ Cài đặt API Webshare</summary>
+        <div class="proxy-settings-body">
+          <label for="proxyApiKeyInput">API Key</label>
+          <div class="proxy-input-row">
+            <input type="password" id="proxyApiKeyInput" placeholder="Dán API Key..." autocomplete="off">
+            <button class="btn-proxy-sm" id="proxyShowKeyBtn">👁</button>
+          </div>
+          <button class="btn-proxy-sm full" id="proxySaveKeyBtn">💾 Lưu</button>
+          <p class="proxy-hint">
+            Lấy key tại <a href="https://proxy.webshare.io/user/settings/api" target="_blank">Webshare → Settings → API</a>
+          </p>
+        </div>
+      </details>
+
+      <hr class="proxy-divider">
+
+      <div class="proxy-info">
+        <p>💡 Bật proxy để đổi IP khi login, tránh bị KlingAI flag nhiều tài khoản cùng IP.</p>
+      </div>
+    </section>
+
+    <div id="status" class="status"></div>
+
+  </div>
+
+  <script src="image-db.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>
