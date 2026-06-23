@@ -273,20 +273,6 @@ h1 {
 .btn-bulk8.download:hover { background: #8a63d2; }
 .btn-bulk8.download.btn-success { background: #238636; }
 
-.btn-bulk8.proxy-rotate {
-  background: #6f42c1;
-  border: none;
-  color: white;
-  font-size: 12px;
-  padding: 10px 12px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: 700;
-  line-height: 1.2;
-  transition: background 0.15s;
-}
-.btn-bulk8.proxy-rotate:hover { background: #8a63d2; }
-
 .btn-bulk8.continue {
   background: #b62324;
   border: none;
