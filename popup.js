@@ -552,7 +552,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.body.classList.add('sidebar-mode');
   }
   
-  await loadAll();
+  try {
+    await loadAll();
+  } catch (e) {
+    console.error('[Init] loadAll error:', e);
+    showStatus('Lỗi tải dữ liệu: ' + e.message, 'error', 0);
+  }
 
   // Luôn cập nhật trạng thái nút tiếp tục
   async function updateContinueBtn() {
