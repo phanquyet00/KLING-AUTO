@@ -22,7 +22,8 @@ async function loadAll() {
     prompts: [],
     autoMode: false,
     mode3: false,
-    loginOffset: 0
+    loginOffset: 0,
+    autoProxy: false
   }, r[STORAGE_CONFIG] || {});
   await reloadImagesCache();
 }
@@ -595,6 +596,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   $('autoModeEnabled').checked = config.autoMode || false;
   $('mode3Enabled').checked = config.mode3 || false;
   $('autoPromptEnabled').checked = config.autoPrompt || false;
+  $('proxyEnabled').checked = config.autoProxy || false;
   $('promptsInput').value = (config.prompts || []).join('\n');
 
   
@@ -633,37 +635,38 @@ document.addEventListener('DOMContentLoaded', async () => {
     btn.disabled = true;
     btn.textContent = '▶ Đang xử lý...';
     try {
-      // 1. Đổi proxy trước khi login (nếu có API key)
-      var apiKey = $('proxyApiKeyInput') ? ($('proxyApiKeyInput').value.trim() || '') : '';
-      if (!apiKey) {
-        var storedKey = await api.storage.local.get(['proxy_api_key']);
-        apiKey = storedKey.proxy_api_key || 'g6pz3t4v2xkl9en660kd05c1nw9nhyxz7oxw4uai';
-      }
-      var proxyResp;
-      try {
-        proxyResp = await api.runtime.sendMessage({ action: 'refresh', apiKey: apiKey });
-        if (proxyResp?.index !== undefined) {
-          showStatus('🔀 Proxy #' + (proxyResp.index + 1), 'info', 2000);
-          // Cập nhật UI proxy index
-          var idxText = $('proxyIndexText');
-          if (idxText) idxText.textContent = '#' + (proxyResp.index + 1);
-          var totalText = $('proxyTotalText');
-          if (totalText) totalText.textContent = proxyResp.total;
-          var idxRow = $('proxyIndexRow');
-          if (idxRow) idxRow.style.display = 'block';
+      // 1. Đổi proxy trước khi login (nếu tick checkbox)
+      var autoProxy = config.autoProxy;
+      if (autoProxy) {
+        var apiKey = $('proxyApiKeyInput') ? ($('proxyApiKeyInput').value.trim() || '') : '';
+        if (!apiKey) {
+          var storedKey = await api.storage.local.get(['proxy_api_key']);
+          apiKey = storedKey.proxy_api_key || 'g6pz3t4v2xkl9en660kd05c1nw9nhyxz7oxw4uai';
         }
-      } catch (e) {
-        // Proxy lỗi vẫn tiếp tục login
+        try {
+          var proxyResp = await api.runtime.sendMessage({ action: 'refresh', apiKey: apiKey });
+          if (proxyResp?.index !== undefined) {
+            showStatus('🔀 Proxy #' + (proxyResp.index + 1), 'info', 2000);
+            var idxText = $('proxyIndexText');
+            if (idxText) idxText.textContent = '#' + (proxyResp.index + 1);
+            var totalText = $('proxyTotalText');
+            if (totalText) totalText.textContent = proxyResp.total;
+            var idxRow = $('proxyIndexRow');
+            if (idxRow) idxRow.style.display = 'block';
+          }
+          // Đợi proxy có hiệu lực
+          await new Promise(r => setTimeout(r, 2000));
+        } catch (e) {
+          // Proxy lỗi vẫn tiếp tục login
+        }
       }
 
-      // 2. Đợi proxy có hiệu lực
-      await new Promise(r => setTimeout(r, 2000));
-
-      // 3. Submit login
+      // 2. Submit login
       const r = await api.runtime.sendMessage({ type: 'CONTINUE_LOGIN' });
       if (r?.success) {
         showStatus('✅ Đã login ' + r.count + ' tài khoản', 'success');
-        // 4. 1 giây sau → tắt proxy
+        // 3. 1 giây sau → tắt proxy (nếu có đổi)
+        if (autoProxy) {
         setTimeout(() => {
           api.runtime.sendMessage({ action: 'disable' }).catch(() => {});
           var display = $('proxyIpDisplay');
@@ -673,6 +676,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           var refBtn = $('proxyRefreshBtn');
           if (refBtn) refBtn.style.display = 'none';
         }, 1000);
+      }
       } else {
         showStatus(r?.error || 'Lỗi', 'error');
       }
@@ -791,6 +795,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     showStatus(config.autoPrompt ? 'Đã bật auto generate' : 'Đã tắt auto generate', 'info');
   });
 
+  $('proxyEnabled').addEventListener('change', async e => {
+    config.autoProxy = e.target.checked;
+    await saveConfig();
+    showStatus(config.autoProxy ? '🌐 Đã bật đổi IP khi login' : '🌐 Đã tắt đổi IP', 'info');
+  });
+
   
   // Realtime sync giữa popup và sidebar (cùng mở thì share state qua storage)
   api.storage.onChanged.addListener((changes, area) => {
@@ -802,6 +812,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (changes[STORAGE_CONFIG]) {
       config = Object.assign({ autoUpload: false, overflowMode: 'loop' }, changes[STORAGE_CONFIG].newValue || {});
       $('autoUploadEnabled').checked = config.autoUpload;
+      $('proxyEnabled').checked = config.autoProxy || false;
       updateBatchIndicator();
     }
   });
