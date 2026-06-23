@@ -671,10 +671,11 @@ document.addEventListener('DOMContentLoaded', async () => {
       const r = await api.runtime.sendMessage({ type: 'CONTINUE_LOGIN' });
       if (r?.success) {
         showStatus('✅ Đã login ' + r.count + ' tài khoản', 'success');
-        // 3. 1 giây sau → tắt proxy (nếu có đổi)
+        // 3. Tắt proxy sau 3s (nếu có đổi)
         if (autoProxy) {
         setTimeout(() => {
           api.runtime.sendMessage({ action: 'disable' }).catch(() => {});
+          showStatus('🌐 Đã tắt proxy', 'info', 2000);
           var display = $('proxyIpDisplay');
           if (display) display.textContent = '--';
           var idxRow2 = $('proxyIndexRow');
