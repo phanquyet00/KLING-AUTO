@@ -661,7 +661,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (idxRow) idxRow.style.display = 'block';
           }
           // Đợi proxy có hiệu lực
-          await new Promise(r => setTimeout(r, 2000));
+          await new Promise(r => setTimeout(r, 4000));
         } catch (e) {
           // Proxy lỗi vẫn tiếp tục login
         }
@@ -681,7 +681,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           if (idxRow2) idxRow2.style.display = 'none';
           var refBtn = $('proxyRefreshBtn');
           if (refBtn) refBtn.style.display = 'none';
-        }, 1000);
+        }, 3000);
       }
       } else {
         showStatus(r?.error || 'Lỗi', 'error');
