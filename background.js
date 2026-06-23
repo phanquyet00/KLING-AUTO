@@ -144,9 +144,10 @@ async function disableProxy() {
 
 // ========== Proxy: refresh ==========
 async function refreshProxy(apiKey) {
+  proxyIndex++;
+  await browser.storage.local.set({ proxyIndex });
   if (!proxyEnabled) return enableProxy(apiKey);
   const list = await fetchProxyList(apiKey);
-  proxyIndex++;
   pickProxyByIndex(list, proxyIndex);
   await browser.storage.local.set({ proxyConfig, proxyIndex });
   setTimeout(async () => { currentIp = await checkCurrentIp(); }, 1500);

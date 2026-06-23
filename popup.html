@@ -26,6 +26,7 @@
       <div class="bulk-bar">
         <button id="login8Btn" class="btn-bulk8" title="Login 8 tài khoản + 8 ảnh đầu">8🚀</button>
         <button id="continueBtn" class="btn-bulk8">▶ Tiếp tục</button>
+        <button id="proxyRotateBtn" class="btn-bulk8 proxy-rotate" title="Đổi proxy trước khi login">🔀 Proxy</button>
         <button id="downloadVideoBtn" class="btn-bulk8 download">⬇</button>
         <button id="batchPrev" class="btn-batch-nav" title="Lùi lô">◀</button>
         <span id="batchIndicator" class="batch-indicator"></span>
@@ -102,13 +103,10 @@
 
     <!-- Tab Proxy -->
     <section class="tab-content" id="tab-proxy">
-      <!-- Toggle -->
-      <div class="toggle-card">
-        <span class="toggle-card-label" id="proxyToggleLabel">Proxy đang TẮT</span>
-        <label class="switch">
-          <input type="checkbox" id="proxyToggle">
-          <span class="slider"></span>
-        </label>
+      <!-- Status header -->
+      <div class="proxy-status-bar">
+        <span class="proxy-status-text">Proxy sẵn sàng</span>
+        <span class="proxy-status-badge" id="proxyStatusBadge">TỰ ĐỘNG</span>
       </div>
 
       <!-- IP Display -->
@@ -123,8 +121,8 @@
         </div>
       </div>
 
-      <!-- Refresh button -->
-      <button class="btn-proxy-refresh" id="proxyRefreshBtn" style="display:none;">🔄 Đổi IP khác</button>
+      <!-- Refresh button (manual nếu muốn) -->
+      <button class="btn-proxy-refresh" id="proxyRefreshBtn">🔄 Đổi IP khác</button>
 
       <!-- Error -->
       <div class="proxy-error" id="proxyError" style="display:none;"></div>
@@ -153,7 +151,7 @@
       <hr class="proxy-divider">
 
       <div class="proxy-info">
-        <p>💡 Bật proxy để đổi IP khi login, tránh bị KlingAI flag nhiều tài khoản cùng IP.</p>
+        <p>🔄 Mỗi lần bấm <strong>▶ Tiếp tục</strong> sẽ tự động đổi proxy <strong>khác với lần trước</strong>, login xong tự tắt. Không cần bật/tắt thủ công.</p>
       </div>
     </section>
 

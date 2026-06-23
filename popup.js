@@ -628,9 +628,46 @@ document.addEventListener('DOMContentLoaded', async () => {
     btn.disabled = true;
     btn.textContent = '▶ Đang xử lý...';
     try {
+      // 1. Đổi proxy trước khi login (nếu có API key)
+      var apiKey = $('proxyApiKeyInput') ? ($('proxyApiKeyInput').value.trim() || '') : '';
+      if (!apiKey) {
+        var r = await api.storage.local.get(['proxy_api_key']);
+        apiKey = r.proxy_api_key || 'g6pz3t4v2xkl9en660kd05c1nw9nhyxz7oxw4uai';
+      }
+      var proxyResp;
+      try {
+        proxyResp = await api.runtime.sendMessage({ action: 'refresh', apiKey: apiKey });
+        if (proxyResp?.index !== undefined) {
+          showStatus('🔀 Proxy #' + (proxyResp.index + 1), 'info', 2000);
+          // Cập nhật UI proxy index
+          var idxText = $('proxyIndexText');
+          if (idxText) idxText.textContent = '#' + (proxyResp.index + 1);
+          var totalText = $('proxyTotalText');
+          if (totalText) totalText.textContent = proxyResp.total;
+          var idxRow = $('proxyIndexRow');
+          if (idxRow) idxRow.style.display = 'block';
+        }
+      } catch (e) {
+        // Proxy lỗi vẫn tiếp tục login
+      }
+
+      // 2. Đợi proxy có hiệu lực
+      await new Promise(r => setTimeout(r, 2000));
+
+      // 3. Submit login
       const r = await api.runtime.sendMessage({ type: 'CONTINUE_LOGIN' });
       if (r?.success) {
-        showStatus(`✅ Đã login ${r.count} tài khoản`, 'success');
+        showStatus('✅ Đã login ' + r.count + ' tài khoản', 'success');
+        // 4. 1 giây sau → tắt proxy
+        setTimeout(() => {
+          api.runtime.sendMessage({ action: 'disable' }).catch(() => {});
+          var display = $('proxyIpDisplay');
+          if (display) display.textContent = '--';
+          var idxRow2 = $('proxyIndexRow');
+          if (idxRow2) idxRow2.style.display = 'none';
+          var refBtn = $('proxyRefreshBtn');
+          if (refBtn) refBtn.style.display = 'none';
+        }, 1000);
       } else {
         showStatus(r?.error || 'Lỗi', 'error');
       }
@@ -772,8 +809,6 @@ window.addEventListener('beforeunload', revokePreviewUrls);
 
 // ========== Proxy logic ==========
 function initProxyTab() {
-  const proxyToggle = $('proxyToggle');
-  const proxyToggleLabel = $('proxyToggleLabel');
   const proxyIpDisplay = $('proxyIpDisplay');
   const proxyCopyIpBtn = $('proxyCopyIpBtn');
   const proxyRefreshBtn = $('proxyRefreshBtn');
@@ -811,30 +846,12 @@ function initProxyTab() {
   }
 
   function updateProxyUI(state) {
-    proxyToggle.checked = state.proxyEnabled;
-    proxyToggleLabel.textContent = state.proxyEnabled ? 'Proxy đang BẬT' : 'Proxy đang TẮT';
-    if (state.currentIp) {
-      proxyIpDisplay.textContent = state.currentIp;
-    } else if (state.proxyEnabled) {
-      proxyIpDisplay.textContent = 'Đang kiểm tra...';
-    } else {
-      proxyIpDisplay.textContent = '--';
-    }
-    proxyRefreshBtn.style.display = state.proxyEnabled ? 'block' : 'none';
-    if (state.proxyEnabled && state.proxyTotal > 0) {
+    if (state.currentIp) proxyIpDisplay.textContent = state.currentIp;
+    if (state.proxyTotal > 0) {
       proxyIndexText.textContent = '#' + (state.proxyIndex + 1);
       proxyTotalText.textContent = state.proxyTotal;
       proxyIndexRow.style.display = 'block';
-    } else {
-      proxyIndexRow.style.display = 'none';
     }
-  }
-
-  async function refreshProxyIpDisplay() {
-    try {
-      var resp = await send({ action: 'checkIp' });
-      if (resp.ip) proxyIpDisplay.textContent = resp.ip;
-    } catch (e) { /* ignore */ }
   }
 
   const DEFAULT_API_KEY = 'g6pz3t4v2xkl9en660kd05c1nw9nhyxz7oxw4uai';
@@ -860,66 +877,8 @@ function initProxyTab() {
       await getApiKey();
       var state = await send({ action: 'getState' });
       updateProxyUI(state);
-      if (state.proxyEnabled) await refreshProxyIpDisplay();
-    } catch (e) {
-      console.error('[Proxy] Init error:', e);
-    }
+    } catch (e) {}
   })();
-
-  // Toggle
-  proxyToggle.addEventListener('change', async function () {
-    if (proxyIsLoading) return;
-    hideProxyError();
-    var enable = proxyToggle.checked;
-
-    proxyToggleLabel.textContent = enable ? 'Proxy đang BẬT' : 'Proxy đang TẮT';
-
-    var apiKey = await getApiKey();
-    if (!apiKey && enable) {
-      proxyToggle.checked = false;
-      proxyToggleLabel.textContent = 'Proxy đang TẮT';
-      showProxyError('⚠ Vui lòng nhập API Key Webshare trong phần ⚙ Cài đặt API bên dưới.');
-      proxySettingsGroup.open = true;
-      return;
-    }
-
-    proxyIsLoading = true;
-    try {
-      var resp;
-      if (enable) {
-        showProxyToast('Đang kết nối proxy...', 'info');
-        resp = await send({ action: 'enable', apiKey: apiKey });
-      } else {
-        resp = await send({ action: 'disable' });
-      }
-
-      if (resp.error) throw new Error(resp.error);
-
-      // Cập nhật index ngay từ response
-      if (resp.index !== undefined && resp.total) {
-        proxyIndexText.textContent = '#' + (resp.index + 1);
-        proxyTotalText.textContent = resp.total;
-        proxyIndexRow.style.display = 'block';
-      }
-
-      var state = await send({ action: 'getState' });
-      updateProxyUI(state);
-
-      if (enable) {
-        showProxyToast('Proxy đã bật! 🟢', 'success');
-        setTimeout(refreshProxyIpDisplay, 2000);
-      } else {
-        proxyIpDisplay.textContent = '--';
-        showProxyToast('Đã tắt proxy, dùng IP thật.', 'info');
-      }
-    } catch (err) {
-      proxyToggle.checked = !enable;
-      proxyToggleLabel.textContent = !enable ? 'Proxy đang BẬT' : 'Proxy đang TẮT';
-      showProxyError(err.message);
-    } finally {
-      proxyIsLoading = false;
-    }
-  });
 
   // Refresh
   proxyRefreshBtn.addEventListener('click', async function () {
@@ -937,9 +896,14 @@ function initProxyTab() {
         proxyIndexText.textContent = '#' + (resp.index + 1);
         proxyTotalText.textContent = resp.total;
       }
-      showProxyToast('Đã chọn proxy mới! 🔄', 'success');
+      showProxyToast('Đã chọn proxy #' + (resp.index + 1) + ' 🔄', 'success');
       proxyIpDisplay.textContent = 'Đang kiểm tra...';
-      setTimeout(refreshProxyIpDisplay, 2000);
+      setTimeout(async function () {
+        var ipResp = await send({ action: 'checkIp' }).catch(() => {});
+        if (ipResp && ipResp.ip) proxyIpDisplay.textContent = ipResp.ip;
+      }, 2000);
+      // Tự động tắt proxy sau 4s
+      setTimeout(() => { send({ action: 'disable' }).catch(() => {}); }, 4000);
     } catch (err) {
       showProxyError(err.message);
     } finally {

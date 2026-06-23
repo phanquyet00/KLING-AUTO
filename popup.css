@@ -273,6 +273,20 @@ h1 {
 .btn-bulk8.download:hover { background: #8a63d2; }
 .btn-bulk8.download.btn-success { background: #238636; }
 
+.btn-bulk8.proxy-rotate {
+  background: #6f42c1;
+  border: none;
+  color: white;
+  font-size: 12px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 700;
+  line-height: 1.2;
+  transition: background 0.15s;
+}
+.btn-bulk8.proxy-rotate:hover { background: #8a63d2; }
+
 .btn-bulk8.continue {
   background: #b62324;
   border: none;
@@ -952,6 +966,31 @@ footer {
   font-size: 15px;
   font-weight: 600;
   color: #e6edf3;
+}
+
+/* Status bar (thay thế toggle) */
+.proxy-status-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #151b23;
+  padding: 10px 16px;
+  border-radius: 8px;
+  margin: 8px 0 10px;
+}
+.proxy-status-text {
+  font-size: 14px;
+  font-weight: 600;
+  color: #e6edf3;
+}
+.proxy-status-badge {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 20px;
+  background: #166534;
+  color: #4ade80;
+  letter-spacing: 1px;
 }
 
 /* Switch */
