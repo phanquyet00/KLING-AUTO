@@ -636,8 +636,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       // 1. Đổi proxy trước khi login (nếu có API key)
       var apiKey = $('proxyApiKeyInput') ? ($('proxyApiKeyInput').value.trim() || '') : '';
       if (!apiKey) {
-        var r = await api.storage.local.get(['proxy_api_key']);
-        apiKey = r.proxy_api_key || 'g6pz3t4v2xkl9en660kd05c1nw9nhyxz7oxw4uai';
+        var storedKey = await api.storage.local.get(['proxy_api_key']);
+        apiKey = storedKey.proxy_api_key || 'g6pz3t4v2xkl9en660kd05c1nw9nhyxz7oxw4uai';
       }
       var proxyResp;
       try {
