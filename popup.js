@@ -561,6 +561,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   // Luôn cập nhật trạng thái nút tiếp tục
+  let autoContinueTriggered = false;
   async function updateContinueBtn() {
     const btn = $('continueBtn');
     try {
@@ -573,6 +574,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         btn.classList.add('ready');
         btn.disabled = false;
         btn.textContent = `▶ Tiếp tục (${state.count})`;
+        // Tự động continue nếu tick checkbox Đổi IP
+        if (config.autoProxy && !autoContinueTriggered) {
+          autoContinueTriggered = true;
+          setTimeout(() => btn.click(), 500);
+        }
       } else if (state?.count > 0) {
         btn.classList.remove('ready');
         btn.disabled = true;
@@ -628,7 +634,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       $('quickAddBtn').click();
     }
   });
-  $('login8Btn').addEventListener('click', loginFirst8);
+  $('login8Btn').addEventListener('click', () => { autoContinueTriggered = false; loginFirst8(); });
   $('continueBtn').addEventListener('click', async () => {
     const btn = $('continueBtn');
     if (btn.disabled) return;
